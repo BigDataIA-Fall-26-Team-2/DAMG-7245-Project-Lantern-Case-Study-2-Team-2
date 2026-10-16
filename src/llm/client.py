@@ -200,10 +200,14 @@ class Client:
 
     def _openai(self):
         if self._sdk is None:
-            if not os.getenv("OPENAI_API_KEY"):
-                raise ConfigurationError("Set OPENAI_API_KEY in your environment before a paid call")
+            key = os.getenv("OPENAI_API_KEY")
+            if key is None:
+                from dotenv import dotenv_values
+                key = dotenv_values(self.root / ".env", interpolate=False).get("OPENAI_API_KEY")
+            if not key or not key.strip():
+                raise ConfigurationError("Set OPENAI_API_KEY in the environment or local .env before a paid call")
             from openai import OpenAI
-            self._sdk = OpenAI(max_retries=0, timeout=self.config.get("timeout_s", 60))
+            self._sdk = OpenAI(api_key=key, max_retries=0, timeout=self.config.get("timeout_s", 60))
         return self._sdk
 
     def _structured(self, response_model, messages, model, temperature, max_tokens):

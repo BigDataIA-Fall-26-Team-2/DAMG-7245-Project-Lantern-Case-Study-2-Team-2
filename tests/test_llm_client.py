@@ -349,3 +349,41 @@ def test_selected_default_is_allowlisted_and_explicit_role_can_override(config, 
     assert len(calls) == 1
     with pytest.raises(ValueError, match="model_choices"):
         Client(path, default_model="not-approved")
+
+
+
+def test_key_file_is_local_lazy_and_does_not_mutate_environment(config, monkeypatch):
+    path, _ = config
+    (path.parent / ".env").write_text("OPENAI_API_KEY=offline-file-placeholder\n")
+    c = client(config)
+    seen = []
+    import openai
+    monkeypatch.setattr(openai, "OpenAI", lambda **kw: seen.append(kw) or object())
+    assert seen == []
+    c._openai()
+    assert seen[0]["api_key"] == "offline-file-placeholder"
+    assert os.getenv("OPENAI_API_KEY") is None
+
+
+def test_exported_key_takes_precedence_over_file(config, monkeypatch):
+    (config[0].parent / ".env").write_text("OPENAI_API_KEY=offline-file-placeholder\n")
+    monkeypatch.setenv("OPENAI_API_KEY", "offline-environment-placeholder")
+    seen = []
+    import openai
+    monkeypatch.setattr(openai, "OpenAI", lambda **kw: seen.append(kw) or object())
+    client(config)._openai()
+    assert seen[0]["api_key"] == "offline-environment-placeholder"
+
+
+def test_replay_never_reads_key_file(config, monkeypatch):
+    import dotenv
+    monkeypatch.setattr(dotenv, "dotenv_values", lambda *a, **k: pytest.fail("Read secrets in replay"))
+    c = client(config, mode="replay")
+    with pytest.raises(CacheMiss): call(c)
+
+
+def test_empty_exported_key_does_not_fall_back_to_file(config, monkeypatch):
+    (config[0].parent / ".env").write_text("OPENAI_API_KEY=offline-file-placeholder\n")
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    with pytest.raises(ValueError, match="OPENAI_API_KEY"):
+        client(config)._openai()

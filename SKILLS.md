@@ -70,7 +70,7 @@ No `CLAUDE.md`, `AGENTS.md`, or other tool-specific stub files — this is the o
 ## Secrets and network
 - Never commit API keys, AWS/GCP/Azure credentials, or tokens.
 - Local secrets go in `.env` (gitignored). Since the pipeline also runs in Docker, container-specific overrides go in a separate `.env.docker` (also gitignored) — never bake either into an image.
-- For CI and any shared/automated runs, use GitHub Actions secrets. Never commit a `.env` file of any name, anywhere.
+- For CI and any shared/automated runs, use GitHub Actions secrets. Never commit secret-bearing environment files. The explicitly requested `.env.example` may contain empty placeholders and comments only; real `.env` and `.env.*` files remain ignored.
 - Anything exercised by CI (`.github/workflows/smoke.yml`) must run against `tests/fixtures/` only — no EDGAR, no cloud document-AI calls, no DVC remote access from CI.
 
 ## When you add or change a tool

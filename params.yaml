@@ -155,7 +155,7 @@ evaluate:
       max_cer_scanned: 0.03       # baseline 0.0107
       max_wer_statement: 0.12     # baseline 0.0714
 
-# CS2 shared client: replay first; paid calls remain disabled until caps/key are agreed.
+# CS2 shared client: replay by default; approved initial test caps require explicit record/live mode.
 llm:
   mode: replay
   provider: openai
@@ -176,5 +176,5 @@ llm:
   long_context:
     gpt-6-luna: {above_input_tokens: 272000, prices: [0.20, 0.75]}
 budget:
-  usd_cap_total: 0
-  usd_cap_per_task: 0
+  usd_cap_total: 1.00
+  usd_cap_per_task: 0.05

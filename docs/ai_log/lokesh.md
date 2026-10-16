@@ -219,3 +219,17 @@
 - Verification: reviewed the added guidance and ran `git diff --check`. Documentation only; no additional runtime tests needed beyond the model-selector suite already recorded.
 - Limitation: no cost-tab implementation, cloud billing connection or new measurements were added. The user subsequently authorized committing/pushing the guidance with the model-selector changes.
 - Confidence: high that the guidance reflects the discussed scope and evidence requirements.
+
+
+## 2026-10-16 — Local API-key example and lazy file loading
+- Tool: Codex (GPT-6). Added the explicitly requested `.env.example` with an empty API-key placeholder; ignore actual `.env.*` files while permitting only the example. Read `OPENAI_API_KEY` lazily from the params-root `.env` when no exported variable exists, without mutating process environment or reading secrets in replay. Updated instructions, the placeholder exception in SKILLS, and the existing pinned CI dependency list.
+- Verification: 32 focused client/model-selector tests passed, including key-file precedence, empty exported key, lazy loading and no key-file reads in replay; git ignore checks and `git diff --check` passed. No real `.env` was created/read, no key was supplied to a provider and no paid call was made.
+- Limitation: live authentication is still unverified and paid caps remain zero. This change does not enable record mode automatically.
+- Confidence: high for local secret-file lookup and tested precedence; changes remain uncommitted/unpushed awaiting approval.
+
+### 2026-10-16 — Approved initial API test and replay
+
+- User approved $1 total / $0.05 per-task initial caps; params stays in replay by default.
+- One real Luna synthetic structured request succeeded: 77 input tokens, 16 output tokens, estimated model cost $0.0000157. No credential was printed.
+- Cached replay matched with provider initialization and socket connections blocked; ledger bytes stayed unchanged. Temporary verification script and evidence stayed outside the repository.
+- Real Kestrel/variant recordings, DVC cache tracking, provider billing alerts and full pipeline replay remain pending. No commit or push performed.

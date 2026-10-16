@@ -455,3 +455,7 @@ models/
 
 # Local model usage ledger (cache payloads remain under ignored data/).
 /logs/
+
+# Secret environment files; only the empty example may be tracked.
+.env.*
+!.env.example

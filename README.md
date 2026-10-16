@@ -95,8 +95,9 @@ it is not the full developer environment.
 Use the [shared-client guide](docs/llm_client.md) for structured model responses,
 hosted/open embeddings, scoped record/replay and task cost tracking. Run
 `python -m pytest tests/test_llm_client.py -q` for a zero-cost offline check.
-Models/prices are unset and paid budgets are zero until the team configures
-them; no API key is required for the test suite. All downstream modules must
+Luna text models and prices are configured, with initial local-ledger caps of
+$1 total and $0.05 per task. Replay remains the default; no API key is required
+for the test suite. All downstream modules must
 use this helper rather than direct provider calls.
 
 ### App model control
@@ -107,3 +108,10 @@ default and the mini snapshot is available as an alternative. Selection is
 session-only and feeds `session_llm_client`; it never edits shared params or
 starts a paid call. Existing explorer panels display saved outputs; Q&A request
 integration remains pending. See the [client guide](docs/llm_client.md).
+
+### Local OpenAI key
+
+Copy `.env.example` to `.env` and paste the key into `OPENAI_API_KEY=` locally.
+The shared helper reads it lazily for provider calls; an exported environment
+variable takes precedence. `.env` and other real environment files are ignored
+by Git. Adding a key does not change the default replay mode.

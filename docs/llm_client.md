@@ -20,7 +20,8 @@ This proves the helper behavior, not extraction accuracy or live model access.
 
 ## Configure a real run
 
-The committed `params.yaml` defaults to replay and zero paid-call budgets.
+The shared `params.yaml` defaults to replay. The approved initial local-ledger
+budgets are $1 total and $0.05 per task.
 Text roles `large` and `small` initially use the low-cost `gpt-6-luna` model;
 judge/vision and embeddings are still unset. The role names do not imply that
 we have benchmarked two different model sizes. Importing the module does not read configuration, create
@@ -38,11 +39,15 @@ Before recording real requests:
    `[USD per million input tokens, USD per million output tokens]`. Embeddings
    use an output rate of zero. These are ordinary list-price estimates; caching
    discounts and other provider billing adjustments are not inferred.
-3. Agree positive `budget.usd_cap_total` and `budget.usd_cap_per_task`, and set
-   provider billing alerts. They are deliberately zero until the team decides.
+3. Review `budget.usd_cap_total` and `budget.usd_cap_per_task` before recording.
+   Initial approved caps are $1 total and $0.05 per task for this local ledger;
+   provider billing alerts remain a separate setup task.
 4. Supply `OPENAI_API_KEY` through your local environment or deployment secrets.
    Do not put it in params, code, cache metadata, screenshots or Git. The helper
-   does not auto-load a secrets file.
+   reads only `OPENAI_API_KEY` from the local `.env` next to the selected params
+   file, and only when a provider connection is needed. Existing environment
+   variables take precedence; replay never reads the key file. It does not
+   export file values into the process environment.
 5. Set `LANTERN_LLM_MODE=record` explicitly. The environment variable overrides
    `llm.mode` when a new Client is constructed. Use `temperature: null` if the
    selected model does not support a temperature option. Model/API capability
@@ -190,7 +195,7 @@ premiums remain outside these baseline list-price estimates.
 
 For illustration, 10,000 input + 1,000 output tokens costs $0.0015 at those
 short-context rates, before other charges. This is arithmetic, not a measured
-project bill or a guarantee of token counts. Existing caps remain zero.
+project bill or a guarantee of token counts. Initial local-ledger caps are $1 total and $0.05 per task.
 
 `reasoning_effort: none` and omitted temperature keep the initial Chat
 Completions request simple; the reasoning setting is part of the cache key.
@@ -222,3 +227,28 @@ The selector performs no inference. The inherited explorer still displays
 existing pipeline outputs and has no connected Q&A form yet. Future request
 handlers must use the session factory; model ID is already part of response
 cache identity. Existing key/budget/replay restrictions continue to apply.
+
+## Local key file
+
+```bash
+cp -n .env.example .env
+```
+
+Open `.env` locally and fill `OPENAI_API_KEY=` with your real key. Keep it out
+of chat, screenshots, logs and Git. The example contains no key and is safe to
+share. The helper checks the environment first, then this local file; file
+values do not overwrite exported variables or mutate other sessions.
+
+Only the API key is read from this file. Mode, models and budgets remain in
+params (or the explicit mode environment override). Copying the example does
+not enable paid calls: replay remains the default mode. An empty
+or missing key produces a clear configuration error on a provider attempt.
+
+### Initial live verification — 2026-10-16
+
+One synthetic structured request to `gpt-6-luna` returned the validated value
+42 and unit USD. Provider-reported usage was 77 input and 16 output tokens,
+with an estimated model cost of $0.0000157 at configured rates. Replay returned
+the same result while provider initialization and socket connections were
+blocked, and left the usage ledger unchanged. This verifies the helper only;
+real document recordings and full pipeline replay remain pending.
