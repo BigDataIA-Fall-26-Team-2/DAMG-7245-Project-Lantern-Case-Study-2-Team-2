@@ -1,0 +1,156 @@
+# LANTERN pipeline parameters — one section per DVC stage.
+# Minimum keys per Case Study 1, Appendix A. Each owner tunes their section in their own Part's PR.
+# See docs/CONTRACTS.md for shared data shapes (stems, bbox convention, table CSV layout).
+
+# Owner: Lokesh (Part 0 - download)
+download:
+  ticker: AAPL
+  forms: ["10-K", "10-Q"]
+  limit: 1  # exactly one of each form, per the case study's scope
+  filings:
+    10-K: {accession: "0000320193-25-000079", period: "20250927"}
+    10-Q: {accession: "0000320193-26-000020", period: "20260627"}
+  after: "2024-01-01"
+  before: "2026-08-01"  # pinned for reproducibility; bump manually to pick up newer filings
+  user_agent_name: "LANTERN Team 2"
+  user_agent_email: "nandavarapu.s@northeastern.edu"
+
+# Owner: Lokesh (Part 0 - render)
+render:
+  page_format: "Letter"
+
+# Owner: Lokesh (Part 1 - OCR fallback)
+ocr:
+  min_chars: 20
+  junk_ratio: 0.3
+  dpi: 300
+  language: eng
+
+# Owner: Dhruvi (Part 2 - tables)
+tables:
+  min_rulings: 4
+  accept_score: 0.6
+  min_numeric_rows: 3     # fewer data rows than this is not a table (prose pages)
+  visible_max_gray: 0.9   # rulings with mean fill gray >= this are invisible (white cell borders)
+
+# Owner: Dhruvi (Part 11 - XBRL). Comparison tolerance comes from each XBRL fact decimals, not from here.
+xbrl:
+  fuzzy_cutoff: 0.85
+  statement_pages:
+    AAPL_10K_20250927: {income: 32, balance: 34, cash_flow: 36}
+    AAPL_10Q_20260627: {income: 4, balance: 6, cash_flow: 9}
+
+# Owner: Shravya (Part 3 - layout)
+layout:
+  model: "efficientdet"
+  score_threshold: 0.25  # sweep on 9 pages: 0.25/0.2/0.1 identical; 0.3 drops blocks on 6/9; 0.5 leaves a page empty
+  max_overlap: 0.5  # drop a box if >50% of it lies inside a higher-scoring box
+  pad_pt: 2.0
+  qa_pages:              # pages that get a box-overlay picture in reports/layout/ (also the 10 audit pages)
+    AAPL_10K_20250927: [1, 10, 20, 22, 32, 34, 50]
+    AAPL_10Q_20260627: [4, 15, 28]
+    multicolumn: [1]
+  text_pad_pt: 8         # sweep: clipped first letters 132->35 (10-K), 51->10 (10-Q); 12 pt gains little and risks the column gap
+  dark_page_brightness: 0.5  # invert pages darker than this before detection; fixture 0.18 vs Apple pages 0.87-0.96 (multicolumn fixture: 0 -> 7 text blocks)
+  column_gap_pt: 50          # new column when block left edges jump by more than this; multicolumn fixture gaps are 150+ pt
+# Owner: Shravya (Part 4 - Docling); keys to be filled in during that part
+docling:
+  do_ocr: false             # Apple PDFs have a text layer (P1: 0 OCR pages); OCR only slows Docling down
+  table_mode: "accurate"    # TableFormer mode: "accurate" or "fast"
+  device: "auto"            # auto | cpu | mps (Mac GPU); auto uses MPS when available
+  serve_url: ""              # empty = Docling as a library; e.g. "http://localhost:5001" = docling-serve over HTTP (#83)
+  serve_timeout_s: 600       # max seconds to wait for docling-serve to convert one file
+  html_stem: "AAPL_10K_20250927"   # the filing whose original iXBRL HTML is also converted (Part 4 task 2)
+
+# Owner: Guna (Part 5 - export)
+export:
+  out_dir: "data/export"
+  layout_dir: "data/layout"
+  docling_dir: "data/docling"
+  tables_dir: "data/tables"
+  paragraph_gap_pt: 6.0
+  emit_docling: true
+  company_by_ticker:
+    AAPL: "Apple Inc."
+
+# Owner: Shravya (Part 10 - benchmarking); keys to be filled in during that part
+bench:
+  extra_pdfs: ["tests/fixtures/scanned.pdf"]   # image-only pages, so OCR's cost is measured (Apple pages never need OCR)
+  docling_devices: ["cpu", "mps"]              # cpu = comparable to a CPU-only VM; mps = the Mac's GPU
+  pages_per_year: 500000          # 5,000 filings x ~100 pages (Tutorial Exercise 10)
+  workers_per_vm: 4               # assumption: parallel page workers on 8 vCPU / 16 GiB (layout peaks at ~2 GB)
+  vm_cpu: {name: "c7i.2xlarge", usd_per_hour: 0.357}   # on-demand us-east-1, doit.com/compute/spot/us-east-1/c7i.2xlarge
+  vm_gpu: {name: "g4dn.2xlarge", usd_per_hour: 0.752}  # on-demand us-east-1, devzero.io/instances/aws/g4dn.2xlarge
+  textract_usd_per_page: {ocr: 0.0015, tables: 0.015}  # first 1M pages/month, aws.amazon.com/textract/pricing
+
+# Owner: Guna (Part 7 - build vs buy, managed document AI)
+# enabled stays false in the repo: the pipeline must run with no AWS
+# credentials, reading cache hits only. Set it true, or pass --enable, to
+# populate the cache.
+managed:
+  provider: "aws_textract"
+  enabled: false
+  region: "us-east-1"
+  features: ["TABLES", "LAYOUT"]
+  cache_dir: "data/managed"
+  dpi: 150
+  # 3 pages, within the brief's 10-page ceiling. The two statement pages are
+  # the ones with hand-keyed ground truth, so Textract is scored against the
+  # same reference as the open-source path; the scanned fixture is where a
+  # managed service should have the advantage.
+  pages:
+    AAPL_10K_20250927: [32]
+    AAPL_10Q_20260627: [6]
+  fixture_pages:
+    scanned: [1]
+  # thresholds for the fallback trigger inside the parsing and table stages
+  trigger:
+    min_ocr_conf: 0.75     # mean OCR confidence below this on a page
+    min_table_score: 0.50  # table quality score below this
+
+# Owner: Guna (Part 9 - evaluation); thresholds to be set from the measured baseline
+evaluate:
+  gt_dir: data/ground_truth
+  export_dir: data/export
+  metrics_out: reports/metrics.json
+  xbrl_dir: data/xbrl        # Part 11 comparison CSVs, for the XBRL match rate in metrics.json
+  plot_out: reports/plots/drift.png
+  stems:
+    - AAPL_10K_20250927
+    - AAPL_10Q_20260627
+  # stratum for every sampled page, fixed before any parser output was seen
+  strata:
+    AAPL_10K_20250927_p1: cover
+    AAPL_10K_20250927_p5: prose
+    AAPL_10K_20250927_p6: prose
+    AAPL_10K_20250927_p32: statement
+    AAPL_10K_20250927_p34: statement
+    AAPL_10K_20250927_p36: statement
+    AAPL_10K_20250927_p40: notes
+    AAPL_10K_20250927_p43: notes
+    AAPL_10Q_20260627_p1: cover
+    AAPL_10Q_20260627_p4: statement
+    AAPL_10Q_20260627_p6: statement
+    AAPL_10Q_20260627_p9: statement
+    AAPL_10Q_20260627_p11: notes
+    AAPL_10Q_20260627_p16: notes
+    AAPL_10Q_20260627_p17: prose
+    AAPL_10Q_20260627_p22: prose
+    multicol_p1: multicolumn
+    scanned_p1: scanned
+  # Each threshold records the measured baseline it was set from, so that
+  # tightening or loosening it later is a visible decision.
+  thresholds:
+    min_gt_pages: 16            # 18 transcribed; 16 scoreable (2 fixtures have no export)
+    min_gt_tables: 2            # Lab 9 minimum
+    max_wer_prose: 0.20        # baseline worst prose page 0.153
+    max_cer_prose: 0.12        # baseline prose mean 0.079
+    min_numeric_f1: 0.65       # baseline 0.7235 all pages, traditional (repeats counted)
+    min_table_cell_f1: 0.90     # baseline 1.0 on both hand-keyed tables
+    min_table_value_recall: 0.90  # baseline 1.0
+    allow_unmeasured: [multicol_p1, scanned_p1]    # fixtures have no filing export; scored by tests/test_fixture_quality.py instead
+    fixtures:                     # committed fixtures, scored fresh in CI by tests/test_fixture_quality.py
+      max_wer_multicolumn: 0.95   # baseline 0.9255: Part 1 raw text reads across the columns (eval.md finding 10)
+      max_wer_scanned: 0.05       # baseline 0.0225, Tesseract
+      max_cer_scanned: 0.03       # baseline 0.0107
+      max_wer_statement: 0.12     # baseline 0.0714

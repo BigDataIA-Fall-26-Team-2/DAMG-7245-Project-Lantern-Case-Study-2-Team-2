@@ -1,0 +1,19 @@
+stem,page,block_id,precision,bbox,note
+AAPL_10K_20250927,27,p0027_b901,union,"[7.0, 94.62, 601.95, 576.4]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927,39,p0039_b901,union,"[7.0, 83.92, 603.11, 537.59]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927,42,p0042_b901,union,"[7.0, 85.94, 604.45, 567.18]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927,44,p0044_b901,union,"[7.0, 83.92, 604.94, 503.59]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927,45,p0045_b901,union,"[7.0, 151.36, 610.47, 725.04]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927,46,p0046_b901,union,"[41.13, 71.95, 610.92, 596.88]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927.docling,27,p0027_b901,union,"[5.59, 93.19, 606.94, 566.99]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927.docling,46,p0046_b902,union,"[5.26, 70.03, 606.91, 565.82]","2 layout Table regions, 1 table CSVs"
+AAPL_10K_20250927.docling,47,p0047_b901,union,"[5.15, 103.8, 607.28, 501.55]","2 layout Table regions, 1 table CSVs"
+AAPL_10Q_20260627,5,p0005_b901,union,"[0.0, 107.42, 605.85, 779.07]","2 layout Table regions, 1 table CSVs"
+AAPL_10Q_20260627,9,p0009_b901,page,"[0.0, 0.0, 612.0, 792.0]",no layout Table region on this page; bbox is the full page
+AAPL_10Q_20260627,11,p0011_b901,union,"[7.0, 112.24, 602.03, 611.25]","2 layout Table regions, 1 table CSVs"
+AAPL_10Q_20260627,14,p0014_b901,union,"[7.0, 80.19, 604.47, 458.12]","2 layout Table regions, 1 table CSVs"
+AAPL_10Q_20260627,20,p0020_b901,union,"[0.61, 112.95, 607.23, 776.0]","2 layout Table regions, 1 table CSVs"
+AAPL_10Q_20260627,28,p0028_b901,page,"[0.0, 0.0, 612.0, 792.0]",no layout Table region on this page; bbox is the full page
+AAPL_10Q_20260627.docling,15,p0015_b901,union,"[5.25, 114.64, 607.19, 627.39]","3 layout Table regions, 2 table CSVs"
+AAPL_10Q_20260627.docling,15,p0015_b902,union,"[5.25, 114.64, 607.19, 627.39]","3 layout Table regions, 2 table CSVs"
+AAPL_10Q_20260627.docling,21,p0021_b902,union,"[6.02, 93.85, 606.84, 468.72]","2 layout Table regions, 1 table CSVs"
