@@ -202,3 +202,23 @@ The [deprecation schedule](https://developers.openai.com/api/docs/deprecations)
 lists GPT-4.1 nano shutdown on October 23, 2026 and GPT-4.1 shutdown on
 January 14, 2027; they are avoided for this new setup. Final extraction/judge
 quality still requires measured evaluation before choosing more capable roles.
+
+## Streamlit model dropdown
+
+Run `python -m streamlit run app/app.py -- --params params.yaml`. The sidebar
+Model dropdown reads `llm.model_choices`, uses the configured large-role default
+initially, and shows the selected model's standard input/output rates. Luna is
+the default; the configured GPT-5.4 mini snapshot is an alternative. Add another
+supported model and verified prices to configuration rather than editing the UI.
+Generation settings must also be compatible with any newly approved model.
+
+Selection lives in the current Streamlit session, not in a YAML write or shared
+mutable global. `session_llm_client(params_path)` forwards it as the Client's
+allowlisted `default_model`; explicit per-call models still override it for
+purpose-specific work such as judging. A new session starts from the configured
+default, and removing a selected model from the config resets to a valid choice.
+
+The selector performs no inference. The inherited explorer still displays
+existing pipeline outputs and has no connected Q&A form yet. Future request
+handlers must use the session factory; model ID is already part of response
+cache identity. Existing key/budget/replay restrictions continue to apply.

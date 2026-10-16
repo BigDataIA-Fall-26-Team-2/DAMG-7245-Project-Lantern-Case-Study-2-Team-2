@@ -329,3 +329,23 @@ def test_reasoning_setting_is_forwarded_and_changes_cache_identity(config):
     c._sdk.close()
     changed = client(config, mode="replay", reasoning_effort="low")
     with pytest.raises(CacheMiss): call(changed)
+
+
+
+def test_selected_default_is_allowlisted_and_explicit_role_can_override(config, monkeypatch):
+    path, value = config
+    value["llm"]["model_choices"] = ["test-model", "alternate-model"]
+    value["llm"]["prices"]["alternate-model"] = [1, 1]
+    path.write_text(yaml.safe_dump(value))
+    before = path.read_bytes()
+    c = Client(path, default_model="alternate-model")
+    calls = provider(c, monkeypatch)
+    assert call(c).value == 42
+    assert calls[0][2] == "alternate-model"
+    assert c._model(None, "large") == "alternate-model"
+    assert c._model("test-model", "large") == "test-model"
+    assert c._model(None, "large") != Client(path)._model(None, "large")
+    assert path.read_bytes() == before
+    assert len(calls) == 1
+    with pytest.raises(ValueError, match="model_choices"):
+        Client(path, default_model="not-approved")

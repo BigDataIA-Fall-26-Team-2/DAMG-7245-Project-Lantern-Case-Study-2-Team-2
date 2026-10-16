@@ -6,8 +6,8 @@ from it, the XBRL check for its numbers, and the key metrics.
 Run from the repo root:
     streamlit run app/app.py -- --data data --reports reports
 
-Every panel reads pipeline outputs only (no imports from src/). A panel whose input has not
-been produced yet says which stage writes it instead of failing.
+Explorer panels read existing pipeline outputs. The model selector configures the shared
+client for new session requests; it does not run inference or regenerate existing outputs.
 """
 import argparse
 import json
@@ -17,6 +17,11 @@ from pathlib import Path
 import pandas as pd
 import pdfplumber
 import streamlit as st
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from src.llm.client import Client
 
 BLOCK_COLOURS = {"Text": (31, 119, 180), "Title": (214, 39, 40), "List": (44, 160, 44),
                  "Table": (255, 127, 14), "Figure": (148, 103, 189), "Footnote": (140, 86, 75)}
@@ -30,6 +35,7 @@ def parse_args():
     ap = argparse.ArgumentParser(description="LANTERN explorer")
     ap.add_argument("--data", default="data", help="pipeline data folder")
     ap.add_argument("--reports", default="reports", help="reports folder (metrics.json)")
+    ap.add_argument("--params", default=str(ROOT / "params.yaml"), help="pipeline configuration")
     ap.add_argument("--dpi", type=int, default=110, help="page image resolution")
     args, _ = ap.parse_known_args(sys.argv[1:])
     return args
@@ -84,6 +90,33 @@ def first_existing(*paths):
 def by_path(traditional, docling):
     """(preferred, fallback) for the extraction path chosen in the XBRL tab."""
     return (docling, traditional) if st.session_state.get("path") == "docling" else (traditional, docling)
+
+
+def session_llm_client(params_path):
+    return Client(params_path, default_model=st.session_state.get("llm_model"))
+
+
+def model_controls(params_path):
+    st.header("AI model")
+    client = Client(params_path)
+    choices = list(dict.fromkeys(client.config.get("model_choices", [])))
+    if not choices:
+        st.info("No selectable models configured yet.")
+        st.session_state.pop("llm_model", None)
+        return None
+    default = client.config.get("models", {}).get("large")
+    if st.session_state.get("llm_model") not in choices:
+        st.session_state["llm_model"] = default if default in choices else choices[0]
+    selected = st.selectbox("Model", choices, key="llm_model",
+                            help="Applies to new session requests. Existing explorer results are unchanged.")
+    # Other session requests must use this factory rather than a separate provider client.
+    configured = session_llm_client(params_path)
+    rates = configured.config.get("prices", {}).get(selected)
+    if isinstance(rates, list) and len(rates) == 2:
+        st.caption(f"Standard: ${rates[0]:g} input / ${rates[1]:g} output per 1M tokens")
+    st.caption(f"Mode: {configured.mode}. Selection does not start a model request.")
+    st.caption("The explorer shows saved outputs. Q&A is not connected yet.")
+    return configured
 
 
 # ------------------------------------------------------------------- the page
@@ -155,6 +188,11 @@ def main():
     data, reports = Path(args.data), Path(args.reports)
     st.set_page_config(page_title="LANTERN explorer", layout="wide")
     st.title("LANTERN explorer")
+    with st.sidebar:
+        try:
+            model_controls(args.params)
+        except (OSError, KeyError, TypeError, ValueError, yaml.YAMLError) as exc:
+            st.warning(f"Model configuration unavailable: {type(exc).__name__}. Check --params.")
 
     manifest_path = data / "rendered" / "manifest.csv"
     if not manifest_path.exists():

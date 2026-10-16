@@ -44,7 +44,7 @@ Thresholds (`accept_score`, `ocr_conf` cutoffs, etc.) live in `params.yaml`, not
 
 ## CS2 shared model and embedding boundary
 
-`src.llm.client.Client(params_path=None)` loads configuration explicitly; the
+`src.llm.client.Client(params_path=None, default_model=None)` loads configuration explicitly; the
 module itself performs no I/O. `structured(response_model, messages, model=None,
 *, scope, task_id, stage="build", max_tokens=None, input_token_bound=None)`
 returns a validated Pydantic object. `embed(texts, model=None, compute=None,
@@ -62,3 +62,17 @@ costs, live/record/replay semantics and provider-level billing limits.
 The rest of this document still describes inherited CS1 contracts; full
 `lantern/2.0` records and retrieval/fact/calc/answer interfaces remain separate
 setup work. This client does not implement financial grounding or deal profiles.
+
+
+### Session model selection
+
+`llm.model_choices` lists approved text models for the UI; `llm.prices` holds
+their verified rates. `Client(..., default_model=selected)` validates that
+selection against the choices. An explicit per-call `model=` takes precedence,
+then the session default, then the configured role. Selection does not change
+provider, budgets, generation settings, scopes or global params.
+
+Streamlit `app.app.session_llm_client(params_path)` creates the shared Client
+using session key `llm_model`. New app inference actions must use this factory.
+The inherited explorer currently has no Q&A action: its existing panels keep
+showing pipeline outputs rather than pretending model selection regenerates them.

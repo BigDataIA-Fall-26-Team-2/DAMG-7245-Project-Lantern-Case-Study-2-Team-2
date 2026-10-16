@@ -160,6 +160,7 @@ llm:
   mode: replay
   provider: openai
   models: {large: gpt-6-luna, small: gpt-6-luna, judge: null, vision: null}
+  model_choices: [gpt-6-luna, gpt-5.4-mini-2026-03-17]
   embed: {hosted: null, open: null, open_revision: null}
   temperature: null
   reasoning_effort: "none"
@@ -167,8 +168,11 @@ llm:
   timeout_s: 60
   ledger: logs/cost_ledger.jsonl
   # Standard rates checked 2026-10-16: https://developers.openai.com/api/docs/models/gpt-6-luna
+  # Mini alternative: https://developers.openai.com/api/docs/models/gpt-5.4-mini
   # Roles large/small initially share the low-cost model; this is not a model-size comparison.
-  prices: {gpt-6-luna: [0.10, 0.50]}
+  prices:
+    gpt-6-luna: [0.10, 0.50]
+    gpt-5.4-mini-2026-03-17: [0.75, 4.50]
   long_context:
     gpt-6-luna: {above_input_tokens: 272000, prices: [0.20, 0.75]}
 budget:

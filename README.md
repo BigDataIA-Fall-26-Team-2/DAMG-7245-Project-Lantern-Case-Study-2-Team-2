@@ -98,3 +98,12 @@ hosted/open embeddings, scoped record/replay and task cost tracking. Run
 Models/prices are unset and paid budgets are zero until the team configures
 them; no API key is required for the test suite. All downstream modules must
 use this helper rather than direct provider calls.
+
+### App model control
+
+Run `python -m streamlit run app/app.py -- --params params.yaml` to see the
+sidebar model selector. Options come from `llm.model_choices`; Luna stays the
+default and the mini snapshot is available as an alternative. Selection is
+session-only and feeds `session_llm_client`; it never edits shared params or
+starts a paid call. Existing explorer panels display saved outputs; Q&A request
+integration remains pending. See the [client guide](docs/llm_client.md).

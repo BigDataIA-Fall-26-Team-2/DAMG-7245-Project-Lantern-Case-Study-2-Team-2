@@ -52,11 +52,17 @@ def _nonnegative(value, name):
 
 
 class Client:
-    def __init__(self, params_path=None):
+    def __init__(self, params_path=None, *, default_model=None):
         self.params_path = Path(params_path or Path(__file__).resolve().parents[2] / "params.yaml").resolve()
         self.root = self.params_path.parent
         self.params = yaml.safe_load(self.params_path.read_text())
         self.config = self.params["llm"]
+        choices = self.config.get("model_choices", [])
+        if not isinstance(choices, list) or any(not isinstance(m, str) or not m.strip() for m in choices):
+            raise ValueError("model_choices must be a list of model IDs")
+        if default_model is not None and default_model not in choices:
+            raise ValueError("Selected model is not in configured model_choices")
+        self.default_model = default_model
         self.mode = os.getenv("LANTERN_LLM_MODE", self.config.get("mode", "replay"))
         if self.mode not in {"replay", "record", "live"}:
             raise ValueError("LLM mode must be replay, record or live")
@@ -73,7 +79,7 @@ class Client:
             raise ValueError("stage and task_id must be nonempty strings")
 
     def _model(self, explicit, role):
-        value = explicit or self.config.get("models", {}).get(role)
+        value = explicit or self.default_model or self.config.get("models", {}).get(role)
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"Configure a pinned model for {role}, or pass model explicitly")
         return value

@@ -205,3 +205,17 @@
 - Verification: mocked adapter tests cover forwarding/identity for reasoning and full-request long-context pricing; all 25 client tests passed and `git diff --check` passed. No key or paid provider request used.
 - Limitation: account/model access and measured quality/cost are not verified. The official alias lacks a separate documented dated snapshot; cached responses provide replay stability. Prices are baseline list estimates, not complete billing reconciliation.
 - Confidence: high for the documented configured rates/retirement dates; live compatibility must be checked after authorized key/budget setup.
+
+
+## 2026-10-16 — Session model dropdown (uncommitted review)
+- Tool: Codex (GPT-6). Added a Streamlit sidebar model selector from `llm.model_choices`, with Luna as default and the configured mini snapshot as an alternative. The session factory forwards an allowlisted Client default; explicit per-call models still override it. Global YAML, budgets, provider and scope settings are not changed by selection. Added standard price display and `--params` input.
+- Verification: Streamlit AppTest covered switching selection, separate-session defaults, unchanged YAML bytes, resetting a removed option and visibility without rendered documents. Client test verified selected model reaches the mocked provider and an unapproved default is rejected. Complete suite: 206 passed, 13 skipped; `git diff --check` passed. No provider calls, credentials or model downloads were used.
+- Limitation: the inherited explorer has no Q&A form; new inference handlers must use `session_llm_client`. The UI says it displays saved outputs. This is the model control, not the full app redesign or a live model-access check. Browser visual review was not performed; widget behavior was checked through Streamlit's test runner.
+- Confidence: high for tested session/config/client behavior. The user subsequently reviewed and authorized committing/pushing these changes.
+
+
+## 2026-10-16 — Future Usage & Costs tab requirement
+- Tool: Codex (GPT-6). Recorded the agreed future cost-tab requirements in `SKILLS.md`, including current-run resource/token meters, measured versus estimated versus billed amounts, formulas/rate sources, separate projections and shared unit-economics ownership.
+- Verification: reviewed the added guidance and ran `git diff --check`. Documentation only; no additional runtime tests needed beyond the model-selector suite already recorded.
+- Limitation: no cost-tab implementation, cloud billing connection or new measurements were added. The user subsequently authorized committing/pushing the guidance with the model-selector changes.
+- Confidence: high that the guidance reflects the discussed scope and evidence requirements.

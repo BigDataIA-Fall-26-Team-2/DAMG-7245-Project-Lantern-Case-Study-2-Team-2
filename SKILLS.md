@@ -38,6 +38,14 @@ No `CLAUDE.md`, `AGENTS.md`, or other tool-specific stub files — this is the o
 - Include meaningful empty/loading/error/partial-result states and readable tables. Verify keyboard navigation, labels, contrast and usability at the expected demo viewport. Review the rendered app against representative user flows, not only whether it launches.
 - UI acceptance includes selecting and adding companies/documents, switching inputs without stale results, processing an unseen batch, recovering a partial failure, and opening a citation. Retain evidence of these flows when implemented. A polished screen alone does not establish pipeline readiness.
 
+## Future Usage & Costs tab
+- Add this tab when real pipeline measurements are available; do not implement it as part of the current model-selector change or display invented cost/progress data.
+- Default to the current run: company/document/page counts, completion/failure status, elapsed time, CPU time and peak memory. Include model input/output tokens, retries, cache hits and estimated API cost; report cost per document, cited answer, memo and completed run.
+- Include applicable infrastructure meters: instance type/region/rate and billed running time, EBS, S3 storage/requests and transfer. Keep CPU processing time distinct from cloud billed running time, including idle time. Cache hits avoid new API calls but do not eliminate compute/storage costs.
+- Label measured usage, calculated cost estimates and actual billing figures distinctly. Show the rate source/date, currency, scope and formula. Missing measurements or rates must say unavailable, not zero; reconcile billing later rather than claiming an estimate is the AWS bill.
+- Keep projected monthly/annual workloads separate from this run's cost, with visible editable assumptions and sensitivity. The historical $7,500 all-Textract annual scenario must not appear as measured demo spend.
+- Reuse the shared ledger, pipeline measurements and unit-economics calculations owned by Dhruvi. Each component supplies evidence; the UI displays the same calculations instead of creating duplicate pricing logic. Account-wide or live cloud billing access is a separate integration decision, not assumed available.
+
 ## Grounding, replay and cost evidence
 - Facts carry tiers and resolving citations; management/web claims remain explicitly labelled and separate. Derived numbers carry calculator IDs/input traces. Never invent unavailable metrics, prices or disclosures; use the required abstention behavior.
 - Route all model and embedding calls through `src/llm/client.py` with pinned models, recorded usage and budget enforcement. Distinguish live/record mode for unseen inputs from offline submission replay over prepared inputs/caches. A replay cache miss is explicit; it must not trigger a provider call or a weight download.
