@@ -175,3 +175,10 @@
 - Verification: checked unique deliverable rows, exact document/video identifiers, URL query parsing, and `git diff --check`. Documentation only; application tests and DVC reproduction were not rerun.
 - Failure/limitation: copied links included a “Links to an external site” suffix and HTML-escaped ampersand; these were normalized. Destination availability and course-staff sharing permissions were not verified. Final tag/reproduction status is unchanged.
 - Confidence: high for the requested link edits and table cleanup; author remains responsible for audience access.
+
+
+## 2026-10-16 — CS2 pipeline and Streamlit guidance
+- Tool: Codex (GPT-6). Updated `SKILLS.md` to reflect the new CS2 repository, reusable unseen-company batches, controlled configuration, Streamlit input selection and evidence flows, grounding/replay/economics, and shared board ownership.
+- Verification: reviewed the Markdown diff and checked required topics and stale CS1-only guidance; `git diff --check` passed. No pipeline stage or app implementation changed.
+- Limitation: this documents acceptance requirements; the new UI and 8–10 unseen-company rehearsal are not implemented or verified by this PR. Attempted `python3 -m pytest -q`; it could not start because the available Python 3.14 environment has no pytest installed. DVC reproduction was not run because no stage or data configuration changed.
+- Confidence: high for documenting the agreed requirements; no claim of runtime readiness.
