@@ -452,3 +452,6 @@ data/*
 /.dvc/tmp/
 /.dvc/config.local
 models/
+
+# Local model usage ledger (cache payloads remain under ignored data/).
+/logs/

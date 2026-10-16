@@ -154,3 +154,18 @@ evaluate:
       max_wer_scanned: 0.05       # baseline 0.0225, Tesseract
       max_cer_scanned: 0.03       # baseline 0.0107
       max_wer_statement: 0.12     # baseline 0.0714
+
+# CS2 shared client: no paid calls until models, verified prices and caps are set.
+llm:
+  mode: replay
+  provider: openai
+  models: {large: null, small: null, judge: null, vision: null}
+  embed: {hosted: null, open: null, open_revision: null}
+  temperature: 0
+  max_tokens: 1024
+  timeout_s: 60
+  ledger: logs/cost_ledger.jsonl
+  prices: {}  # model ID: [USD per 1M input tokens, USD per 1M output tokens]
+budget:
+  usd_cap_total: 0
+  usd_cap_per_task: 0

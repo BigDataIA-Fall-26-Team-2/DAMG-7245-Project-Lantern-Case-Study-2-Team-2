@@ -16,3 +16,9 @@ playwright
 # Schema validation used by the existing export tests.
 pydantic
 jiwer==4.0.0
+# CS2 offline client/cache contract; providers are mocked in CI.
+numpy
+filelock
+openai
+instructor
+httpx2
