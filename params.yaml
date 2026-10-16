@@ -154,3 +154,27 @@ evaluate:
       max_wer_scanned: 0.05       # baseline 0.0225, Tesseract
       max_cer_scanned: 0.03       # baseline 0.0107
       max_wer_statement: 0.12     # baseline 0.0714
+
+# CS2 shared client: replay by default; approved initial test caps require explicit record/live mode.
+llm:
+  mode: replay
+  provider: openai
+  models: {large: gpt-6-luna, small: gpt-6-luna, judge: null, vision: null}
+  model_choices: [gpt-6-luna, gpt-5.4-mini-2026-03-17]
+  embed: {hosted: null, open: null, open_revision: null}
+  temperature: null
+  reasoning_effort: "none"
+  max_tokens: 1024
+  timeout_s: 60
+  ledger: logs/cost_ledger.jsonl
+  # Standard rates checked 2026-10-16: https://developers.openai.com/api/docs/models/gpt-6-luna
+  # Mini alternative: https://developers.openai.com/api/docs/models/gpt-5.4-mini
+  # Roles large/small initially share the low-cost model; this is not a model-size comparison.
+  prices:
+    gpt-6-luna: [0.10, 0.50]
+    gpt-5.4-mini-2026-03-17: [0.75, 4.50]
+  long_context:
+    gpt-6-luna: {above_input_tokens: 272000, prices: [0.20, 0.75]}
+budget:
+  usd_cap_total: 1.00
+  usd_cap_per_task: 0.05
