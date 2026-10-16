@@ -64,7 +64,7 @@ remote for `dvc pull` once authorized access is verified.
 | Inherited document pipeline | Docling, Arelle, pdfplumber, Camelot, Tesseract adapter, LayoutParser/PyTorch; retained from CS1 |
 | Facts and spreadsheet inputs | DuckDB, pandas, openpyxl |
 | Vector store | Chroma (`chromadb`), local persistent mode by default |
-| Structured model calls | Instructor, OpenAI SDK, Pydantic; integrate through `src/llm/client.py` before use |
+| Structured model calls | Instructor, OpenAI SDK, Pydantic through `src/llm/client.py` |
 | Open embeddings | sentence-transformers, shared PyTorch/Transformers stack |
 | Chunking and keyword retrieval | langchain-text-splitters, rank-bm25 |
 | Retrieval evaluation | ranx |
@@ -89,3 +89,12 @@ and preserve the macOS marker on `appnope`. Review version changes and run
 `pip check` plus the applicable tests before replacing the shared pins. The
 lighter `requirements-ci.txt` uses these pins as constraints for fixture CI;
 it is not the full developer environment.
+
+## Shared model helper
+
+Use the [shared-client guide](docs/llm_client.md) for structured model responses,
+hosted/open embeddings, scoped record/replay and task cost tracking. Run
+`python -m pytest tests/test_llm_client.py -q` for a zero-cost offline check.
+Models/prices are unset and paid budgets are zero until the team configures
+them; no API key is required for the test suite. All downstream modules must
+use this helper rather than direct provider calls.
