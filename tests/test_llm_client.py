@@ -306,3 +306,26 @@ def test_hosted_embedding_sdk_transport_sorts_by_index(config):
     assert np.allclose(result, [[0.2, 0.8]])
     assert c.usage_summary()["usd"] == pytest.approx(0.000004)
     c._sdk.close()
+
+
+
+def test_long_context_rates_use_full_request_usage(config):
+    c = client(config, long_context={"test-model": {"above_input_tokens": 1000, "prices": [2, 3]}})
+    assert c._usd("test-model", 1000, 10) == pytest.approx(0.00101)
+    assert c._usd("test-model", 1001, 10) == pytest.approx(0.002032)
+
+
+def test_reasoning_setting_is_forwarded_and_changes_cache_identity(config):
+    c = client(config, temperature=None, reasoning_effort="none")
+    requests = []
+    def respond(request):
+        payload = json.loads(request.content)
+        assert "temperature" not in payload
+        assert payload["reasoning_effort"] == "none"
+        requests.append(request)
+        return chat_response(request, '{"value": 42}')
+    transport_client(c, respond)
+    assert call(c).value == 42
+    c._sdk.close()
+    changed = client(config, mode="replay", reasoning_effort="low")
+    with pytest.raises(CacheMiss): call(changed)

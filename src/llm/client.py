@@ -80,6 +80,11 @@ class Client:
 
     def _usd(self, model, tin, tout):
         prices = self.config.get("prices", {}).get(model)
+        tier = self.config.get("long_context", {}).get(model)
+        if tier is not None:
+            threshold = _nonnegative(tier["above_input_tokens"], "context threshold")
+            if tin > threshold:
+                prices = tier["prices"]
         if not isinstance(prices, list) or len(prices) != 2:
             raise ValueError(f"Set verified [input, output] USD per million token prices for {model}")
         pin, pout = [_nonnegative(p, "price") for p in prices]
@@ -199,6 +204,9 @@ class Client:
         import instructor
         client = instructor.from_openai(self._openai(), mode=instructor.Mode.JSON_SCHEMA)
         kwargs = {"temperature": temperature} if temperature is not None else {}
+        effort = self.config.get("reasoning_effort")
+        if effort is not None:
+            kwargs["reasoning_effort"] = effort
         out, raw = client.create_with_completion(
             response_model=response_model, messages=messages, model=model,
             max_completion_tokens=max_tokens, max_retries=0, **kwargs)
@@ -216,7 +224,8 @@ class Client:
         temperature = self.config.get("temperature", 0)
         request = {"version": 1, "kind": "structured", "provider": "openai", "scope": scope,
                    "model": model, "messages": messages, "schema": schema,
-                   "temperature": temperature, "max_tokens": max_tokens}
+                   "temperature": temperature, "max_tokens": max_tokens,
+                   "reasoning_effort": self.config.get("reasoning_effort")}
         # Bytes plus schema overhead conservatively estimates text; images need a supplied bound.
         if input_token_bound is None:
             if any(not isinstance(m.get("content"), str) for m in messages):

@@ -20,8 +20,10 @@ This proves the helper behavior, not extraction accuracy or live model access.
 
 ## Configure a real run
 
-The committed `params.yaml` defaults to replay, unset models/prices, and zero
-paid-call budgets. Importing the module does not read configuration, create
+The committed `params.yaml` defaults to replay and zero paid-call budgets.
+Text roles `large` and `small` initially use the low-cost `gpt-6-luna` model;
+judge/vision and embeddings are still unset. The role names do not imply that
+we have benchmarked two different model sizes. Importing the module does not read configuration, create
 folders, import provider SDKs, load model weights or connect to a service.
 Constructing `Client()` reads the repository's params file; an explicit params
 path resolves cache/ledger paths relative to that file, not the working folder.
@@ -171,3 +173,32 @@ write locks or the ledger.
   Part 2 orientation. Reused design/interfaces; no course sample data copied.
 - [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
 - [OpenAI embedding response usage](https://developers.openai.com/api/reference/resources/embeddings/methods/create).
+
+## Initial low-cost selection (checked October 16, 2026)
+
+The text default is `gpt-6-luna` using the existing direct OpenAI adapter.
+This requires an OpenAI API key; the current client does not configure an
+OpenRouter endpoint/key. No API key was accessed and no paid call was made
+when setting these defaults. Account access still needs verification.
+
+The [model page](https://developers.openai.com/api/docs/models/gpt-6-luna)
+lists standard short-context input/output rates of $0.10/$0.50 per million
+tokens. Above 272,000 input tokens, full-request input/output rates become
+$0.20/$0.75. `llm.long_context` applies that threshold to reservations and
+actual reported input usage. Cached-input/cache-write adjustments and regional
+premiums remain outside these baseline list-price estimates.
+
+For illustration, 10,000 input + 1,000 output tokens costs $0.0015 at those
+short-context rates, before other charges. This is arithmetic, not a measured
+project bill or a guarantee of token counts. Existing caps remain zero.
+
+`reasoning_effort: none` and omitted temperature keep the initial Chat
+Completions request simple; the reasoning setting is part of the cache key.
+The official page currently documents the `gpt-6-luna` alias rather than a
+separate dated snapshot, so saved response caches provide replay stability;
+do not claim independent live requests are immutable.
+
+The [deprecation schedule](https://developers.openai.com/api/docs/deprecations)
+lists GPT-4.1 nano shutdown on October 23, 2026 and GPT-4.1 shutdown on
+January 14, 2027; they are avoided for this new setup. Final extraction/judge
+quality still requires measured evaluation before choosing more capable roles.

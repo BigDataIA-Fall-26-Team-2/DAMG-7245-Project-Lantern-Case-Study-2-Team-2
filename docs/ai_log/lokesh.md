@@ -198,3 +198,10 @@
 - Failure found/fixed: Instructor 1.17.0 interprets max_retries=1 as two attempts. Set SDK/Instructor retries to zero and verified exactly one request even on validation failure. Unknown-usage failures retain estimated reservations; caps apply to one ledger, not a shared cross-laptop provider account.
 - Limitations: model IDs/prices, API key, agreed budgets/billing alerts, a live provider check, real Kestrel/variant recordings, DVC cache tracking and Linux/full pipeline replay are pending. This helper validates schema/caching/accounting, not factual grounding or retrieval authorization.
 - Confidence: high for covered offline contracts and mock-transport SDK integration; live model access and provider billing have not been verified. Local branch only; user has not authorized pushing this client change.
+
+
+## 2026-10-16 — Low-cost text model defaults
+- Tool: Codex (GPT-6), OpenAI Docs skill. Checked official pricing/model/deprecation pages and configured GPT-6 Luna for initial large/small text roles, reasoning none with temperature omitted, dated Standard prices and the long-context price threshold. Judge/vision/embedding choices and all paid caps remain unset/zero.
+- Verification: mocked adapter tests cover forwarding/identity for reasoning and full-request long-context pricing; all 25 client tests passed and `git diff --check` passed. No key or paid provider request used.
+- Limitation: account/model access and measured quality/cost are not verified. The official alias lacks a separate documented dated snapshot; cached responses provide replay stability. Prices are baseline list estimates, not complete billing reconciliation.
+- Confidence: high for the documented configured rates/retirement dates; live compatibility must be checked after authorized key/budget setup.
