@@ -161,7 +161,10 @@ llm:
   provider: openai
   models: {large: gpt-6-luna, small: gpt-6-luna, judge: null, vision: null}
   model_choices: [gpt-6-luna, gpt-5.4-mini-2026-03-17]
-  embed: {hosted: null, open: null, open_revision: null}
+  embed:
+    hosted: null
+    open: BAAI/bge-small-en-v1.5
+    open_revision: 5e62ea33e012fda8c02802b906664c915ebd1bb1
   temperature: null
   reasoning_effort: "none"
   max_tokens: 1024
@@ -178,3 +181,21 @@ llm:
 budget:
   usd_cap_total: 1.00
   usd_cap_per_task: 0.05
+
+# CS2 public acquisition. The mixed-sector list is a portability test, not the final graded comps.
+comps:
+  tickers: [AAPL, NVDA, MSFT, GOOGL, AMZN, COST, WMT, JPM, V, XOM]
+  historical_ciks: {XOM: ["0000034088"]}
+  forms: [10-K, 10-Q]
+  after: "2025-01-01"
+  before: "2026-10-16"
+  earnings_8k_quarters: 4
+
+ingest:
+  public:
+    mode: replay
+    run_id: public-ten-20261016-v3
+    user_agent: "LANTERN Team 2 nandavarapu.s@northeastern.edu"
+    requests_per_second: 4
+    timeout_s: 30
+    max_attempts: 2
