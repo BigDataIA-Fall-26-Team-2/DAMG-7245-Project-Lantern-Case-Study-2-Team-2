@@ -40,3 +40,39 @@ Thresholds (`accept_score`, `ocr_conf` cutoffs, etc.) live in `params.yaml`, not
 - `status`: `match` (abs(pdf - xbrl) <= tolerance), `sign` (same magnitude, opposite sign), `scale_x1e{N}` / `scale_x1e-{N}` (xbrl = pdf x 10^N), `mismatch`, `pdf_missing`, `xbrl_missing`. `tolerance` = 0.5 x 10^(-decimals); 0.5 when decimals is INF.
 - `mapping`: `manual` (`config/label_map.yaml`), `label` (the filing's `_lab.xml`), `fuzzy` (difflib, cutoff `xbrl.fuzzy_cutoff`), `ambiguous` (several concepts, none agrees by value), `none`.
 - `cause` is filled automatically for `sign` rows whose concept has a negated preferredLabel in the filing's `_pre.xml`. Other causes are diagnosed in `reports/xbrl.md`.
+
+
+## CS2 shared model and embedding boundary
+
+`src.llm.client.Client(params_path=None, default_model=None)` loads configuration explicitly; the
+module itself performs no I/O. `structured(response_model, messages, model=None,
+*, scope, task_id, stage="build", max_tokens=None, input_token_bound=None)`
+returns a validated Pydantic object. `embed(texts, model=None, compute=None,
+*, scope, task_id, stage="embed")` returns a finite float32 matrix in input order.
+Module-level wrappers expose the same methods plus `params_path=`.
+
+Scope is explicitly `public`, `deal_a`, `deal_b` or `kestrel`; task IDs group
+per-task spending across stages. Cache keys isolate scopes and include content,
+model/settings/schema or embedding revision. Unknown scope/missing configuration
+fails explicitly. `CacheMiss` never triggers a live fallback in replay.
+`BudgetExceeded` rejects a new estimated paid attempt that cannot fit the local
+ledger caps. See [client guide](llm_client.md) for reservations, unknown failure
+costs, live/record/replay semantics and provider-level billing limits.
+
+The rest of this document still describes inherited CS1 contracts; full
+`lantern/2.0` records and retrieval/fact/calc/answer interfaces remain separate
+setup work. This client does not implement financial grounding or deal profiles.
+
+
+### Session model selection
+
+`llm.model_choices` lists approved text models for the UI; `llm.prices` holds
+their verified rates. `Client(..., default_model=selected)` validates that
+selection against the choices. An explicit per-call `model=` takes precedence,
+then the session default, then the configured role. Selection does not change
+provider, budgets, generation settings, scopes or global params.
+
+Streamlit `app.app.session_llm_client(params_path)` creates the shared Client
+using session key `llm_model`. New app inference actions must use this factory.
+The inherited explorer currently has no Q&A action: its existing panels keep
+showing pipeline outputs rather than pretending model selection regenerates them.

@@ -190,3 +190,46 @@
 - Failure/limitation: initial resolution found Instructor requires Rich below 15; changed only the inherited Rich pin from 15.0.0 to the tutorial-compatible 14.3.4. Docker daemon is not running, so full Linux installation is unverified. Existing data-dependent tests are skipped without pipeline artifacts; full DVC reproduction, teammate setup, model weights and shared-client integration remain separate tasks. An initial test attempt began before installation completed and failed collection; the reported passing run occurred after installation completed.
 - Tracking: issue #1 records completed local setup substeps separately from publication, Linux/team verification and full reproduction. The user reviewed the dependency branch and authorized its commit/push; merge and Linux/team verification remain pending.
 - Confidence: high for the locally installed/resolved Python 3.11 stack and fixture results; no claim of full Linux or end-to-end CS2 readiness.
+
+
+## 2026-10-16 — Shared LLM and embedding helper
+- Tool: Codex (GPT-6), using the OpenAI Docs skill and installed SDK inspection. Adapted the LANTERN Part 2 client design into `src/llm/client.py`: explicit config/lazy provider initialization, Pydantic structured calls, hosted/open embeddings, scope/model/schema/revision cache identities, atomic caches, record/replay/live, local-ledger locks and per-task/total spend reservations, actual/error usage and latency. Added replay-first configuration with no chosen models/prices and zero paid budgets, documentation, and ignored local usage logs.
+- Verification: 23 client tests passed, including installed OpenAI/Instructor adapters over in-memory HTTP transport, malformed schema billing, cache isolation/corruption, replay without providers/weights, live semantics, failed-call accounting and concurrent-budget checks. Complete suite: 201 passed, 13 skipped. `pip check` and `git diff --check` passed. Root config check confirmed replay, unset models, zero caps and no ledger usage. No external provider calls, credentials, classroom caches or model weights were used.
+- Failure found/fixed: Instructor 1.17.0 interprets max_retries=1 as two attempts. Set SDK/Instructor retries to zero and verified exactly one request even on validation failure. Unknown-usage failures retain estimated reservations; caps apply to one ledger, not a shared cross-laptop provider account.
+- Limitations: model IDs/prices, API key, agreed budgets/billing alerts, a live provider check, real Kestrel/variant recordings, DVC cache tracking and Linux/full pipeline replay are pending. This helper validates schema/caching/accounting, not factual grounding or retrieval authorization.
+- Confidence: high for covered offline contracts and mock-transport SDK integration; live model access and provider billing have not been verified. Local branch only; user has not authorized pushing this client change.
+
+
+## 2026-10-16 — Low-cost text model defaults
+- Tool: Codex (GPT-6), OpenAI Docs skill. Checked official pricing/model/deprecation pages and configured GPT-6 Luna for initial large/small text roles, reasoning none with temperature omitted, dated Standard prices and the long-context price threshold. Judge/vision/embedding choices and all paid caps remain unset/zero.
+- Verification: mocked adapter tests cover forwarding/identity for reasoning and full-request long-context pricing; all 25 client tests passed and `git diff --check` passed. No key or paid provider request used.
+- Limitation: account/model access and measured quality/cost are not verified. The official alias lacks a separate documented dated snapshot; cached responses provide replay stability. Prices are baseline list estimates, not complete billing reconciliation.
+- Confidence: high for the documented configured rates/retirement dates; live compatibility must be checked after authorized key/budget setup.
+
+
+## 2026-10-16 — Session model dropdown (uncommitted review)
+- Tool: Codex (GPT-6). Added a Streamlit sidebar model selector from `llm.model_choices`, with Luna as default and the configured mini snapshot as an alternative. The session factory forwards an allowlisted Client default; explicit per-call models still override it. Global YAML, budgets, provider and scope settings are not changed by selection. Added standard price display and `--params` input.
+- Verification: Streamlit AppTest covered switching selection, separate-session defaults, unchanged YAML bytes, resetting a removed option and visibility without rendered documents. Client test verified selected model reaches the mocked provider and an unapproved default is rejected. Complete suite: 206 passed, 13 skipped; `git diff --check` passed. No provider calls, credentials or model downloads were used.
+- Limitation: the inherited explorer has no Q&A form; new inference handlers must use `session_llm_client`. The UI says it displays saved outputs. This is the model control, not the full app redesign or a live model-access check. Browser visual review was not performed; widget behavior was checked through Streamlit's test runner.
+- Confidence: high for tested session/config/client behavior. The user subsequently reviewed and authorized committing/pushing these changes.
+
+
+## 2026-10-16 — Future Usage & Costs tab requirement
+- Tool: Codex (GPT-6). Recorded the agreed future cost-tab requirements in `SKILLS.md`, including current-run resource/token meters, measured versus estimated versus billed amounts, formulas/rate sources, separate projections and shared unit-economics ownership.
+- Verification: reviewed the added guidance and ran `git diff --check`. Documentation only; no additional runtime tests needed beyond the model-selector suite already recorded.
+- Limitation: no cost-tab implementation, cloud billing connection or new measurements were added. The user subsequently authorized committing/pushing the guidance with the model-selector changes.
+- Confidence: high that the guidance reflects the discussed scope and evidence requirements.
+
+
+## 2026-10-16 — Local API-key example and lazy file loading
+- Tool: Codex (GPT-6). Added the explicitly requested `.env.example` with an empty API-key placeholder; ignore actual `.env.*` files while permitting only the example. Read `OPENAI_API_KEY` lazily from the params-root `.env` when no exported variable exists, without mutating process environment or reading secrets in replay. Updated instructions, the placeholder exception in SKILLS, and the existing pinned CI dependency list.
+- Verification: 32 focused client/model-selector tests passed, including key-file precedence, empty exported key, lazy loading and no key-file reads in replay; git ignore checks and `git diff --check` passed. No real `.env` was created/read, no key was supplied to a provider and no paid call was made.
+- Limitation: live authentication is still unverified and paid caps remain zero. This change does not enable record mode automatically.
+- Confidence: high for local secret-file lookup and tested precedence; changes remain uncommitted/unpushed awaiting approval.
+
+### 2026-10-16 — Approved initial API test and replay
+
+- User approved $1 total / $0.05 per-task initial caps; params stays in replay by default.
+- One real Luna synthetic structured request succeeded: 77 input tokens, 16 output tokens, estimated model cost $0.0000157. No credential was printed.
+- Cached replay matched with provider initialization and socket connections blocked; ledger bytes stayed unchanged. Temporary verification script and evidence stayed outside the repository.
+- Real Kestrel/variant recordings, DVC cache tracking, provider billing alerts and full pipeline replay remain pending. No commit or push performed.
