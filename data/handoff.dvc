@@ -1,0 +1,6 @@
+outs:
+- md5: 35053d3a22649d0388d2f73b5ce77b83.dir
+  size: 352358047
+  nfiles: 1
+  hash: md5
+  path: handoff
