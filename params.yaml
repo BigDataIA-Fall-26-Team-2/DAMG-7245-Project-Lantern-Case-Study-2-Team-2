@@ -178,3 +178,14 @@ llm:
 budget:
   usd_cap_total: 1.00
   usd_cap_per_task: 0.05
+
+# Owner: Dhruvi (CS2 Part 6 - calculators and comps). Policies are stated in src/calc/*.py docstrings.
+# Company list, date window and price snapshot path come from comps.* / reference.* (Part 0).
+calc:
+  ev:
+    subtract_short_term_investments: true  # current marketable securities turn into cash within a year; long-term ones are not subtracted
+    include_preferred: true                # preferred holders are paid before common equity, so a buyer must take them out too
+    include_nci: true                      # consolidated EBITDA includes subsidiaries' minority share, so EV must too
+  comps:
+    quantiles: [0.25, 0.5, 0.75]           # brief: medians and quartiles; n.m. cells are excluded, never treated as zero
+    spot_check_cells: 10                   # brief: hand-check 10 comps cells

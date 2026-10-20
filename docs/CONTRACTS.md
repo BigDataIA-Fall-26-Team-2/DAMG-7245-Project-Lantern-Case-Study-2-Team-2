@@ -76,3 +76,19 @@ Streamlit `app.app.session_llm_client(params_path)` creates the shared Client
 using session key `llm_model`. New app inference actions must use this factory.
 The inherited explorer currently has no Q&A action: its existing panels keep
 showing pipeline outputs rather than pretending model selection regenerates them.
+
+
+## Calculator outputs (CS2 Part 6, owner: Dhruvi)
+
+Code: `src/calc/` (`core.py`, `metrics.py`, `valuation.py`). Tests: `tests/test_calc.py`. Settings: `params.yaml` `calc.*`.
+
+**Input: `FactRef(fact_id, value, tier, unit)`.** The four fields a calculator needs from one fact-store row (Part 1). `unit` is one of `USD`, `USD/share`, `shares`, `ratio`, `x`. The share price from the instructor snapshot is also a `FactRef`, with a `fact_id` that cites its snapshot row, so an EV trace never ends at an unsourced number.
+
+**Output: `Calc(calc_id, name, value, unit, tier, inputs, formula, note)`.**
+- `calc_id` = `calc-` + the first 12 hex characters of SHA-256 over `{name, formula, sorted (role, input id) pairs}`. The same inputs always give the same id, so replay is stable.
+- `inputs` = `((role, id), ...)`, where `id` is a `fact_id` or another `calc_id`. Following `inputs` recursively reaches facts only. This is the computation trace.
+- `tier` = the highest-numbered (weakest) tier among the inputs (Section 5 of the brief: derived values inherit the lowest tier).
+- `value = None` means **n.m.** (not meaningful), with the reason in `note`. Consumers must show `n.m.` and must exclude it from medians and quartiles; never coerce it to 0.
+- Calculators raise `ValueError` on mixed units instead of guessing.
+
+**Consumers.** Part 4 cites a derived number by its `calc_id` (`GET /calc/{calc_id}`). The comps stage writes every `Calc` it produces, with its full trace, to a JSONL file so `calc_id`s resolve without re-running the calculators; the path will be added here with the `comps_table` stage.
