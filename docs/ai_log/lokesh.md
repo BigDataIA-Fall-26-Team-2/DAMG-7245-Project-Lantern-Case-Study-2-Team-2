@@ -262,3 +262,12 @@
 - Verification: 62 focused tests passed; full suite 242 passed, 13 skipped. Both public acquisition DVC stages replayed successfully for ten companies (20 primary filings, 40 earnings filings). Local handoff restored/verified 2,824 files, validated two records and two facts, and replayed the synthetic profile/open embedding with the provider accessor blocked. The live synthetic request used 325 input/64 output tokens, estimated USD 0.0000645 at configured rates.
 - Failure/limitation: the first synthetic runner did not match the earlier cache identity; recorded the exact new request before proving replay. Packaging reduced the expanded selected snapshots to 352,358,047 compressed bytes. S3 publication initially failed with 403; the local default AWS profile returned InvalidClientTokenId. The local AWS CLI executable also reported bad CPU type. Teammate account access is user-confirmed and is not being treated as a coding blocker. Full inherited CS1/Linux reproduction remains separate later validation.
 - Confidence: high for the tested local handoff and contract validation; remote availability requires a successful DVC upload using the correct AWS profile. Public downloads are raw sources, not completed P0 extraction/P1 facts. Instructor inputs are still pending.
+
+
+### Handoff S3 publication follow-up
+- The user configured profile `lantern`; STS verified `user/lokesh-lantern`.
+- `AWS_PROFILE=lantern dvc push data/handoff.dvc` uploaded both objects. Cloud
+  status was checked and S3 reported the expected 352,358,047-byte archive.
+- Removed the README's upload-pending notice. This resolves the earlier local
+  credential/upload failure; no new EC2 resources or IAM changes were made.
+- Verification confirms remote availability, not a fresh Linux reproduction.

@@ -126,12 +126,10 @@ processing are subsequent P0 work, not claimed complete by downloaded files.
 
 ## CS2 teammate document handoff
 
-**Publication status:** code/examples are ready; uploading the DVC archive is
-pending correction of the publisher's local AWS profile (invalid default token).
-Teammates can start immediately with `python -m src.handoff --samples-only`;
-this validates the Git-shared JSONL examples without AWS. Use the full handoff
-command below once the archive upload is confirmed. This is separate from the
-AWS account access already granted to the team.
+**Publication status:** the 352 MB document/cache archive is uploaded to the
+team's DVC S3 remote. Use `python -m src.handoff` to download, restore and check
+it. For just the Git-shared JSONL examples without AWS, run
+`python -m src.handoff --samples-only`.
 
 Development runs on each teammate's laptop; S3 stores the shared DVC download.
 No EC2 instance is required. Instructor inputs are pending and do not block use
