@@ -20,8 +20,9 @@ Everything here is made up. It contains no data-room content.
 
 ## Known gaps
 
-- `src/schema.py` is still lantern/1.0, so these records do not validate yet.
-  `citation` and `lineage` shapes may change once the 2.0 schema lands.
+- Records validate against `src/schema_cs2.py` (`BlockV2`), checked October 22, 2026 with
+  `python -m src.schema_cs2 records tests/fixtures/isolation/records.jsonl`.
+- `cik` and `ticker` are placeholders for the private toy deals.
 - `sha256` is the hash of each block's text, since there is no source file.
 
 ## Regenerate
@@ -32,9 +33,9 @@ python tests/fixtures/isolation/build_fixture.py
 
 ## Integrity
 
-SHA-256 of the generated files, October 19, 2026:
+SHA-256 of the generated files, October 22, 2026:
 
 ```text
 a6d1e6547ed170dae3ed487a550817b974572e53c0c970e090514108eee3088c  canaries.json
-ec2d6e34ecc0f3e4b6eccd9421307ec129f562adaf82d2df14026c6a809c3af3  records.jsonl
+b188dc256c58e6086262fae67ad82e713797b39f413b3d07db2026cffc79c658  records.jsonl
 ```

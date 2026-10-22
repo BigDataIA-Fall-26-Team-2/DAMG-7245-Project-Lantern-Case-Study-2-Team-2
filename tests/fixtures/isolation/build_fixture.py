@@ -69,7 +69,7 @@ def record(deal_id, doc_id, page, block_id, section, text):
         "source_path": f"tests/fixtures/isolation/{doc_id}.pdf",  # notional, no PDF
         "sha256": sha,  # hash of the text, since there is no real source file
         "tier": 2 if is_public else 4,
-        "citation": {"kind": "pdf_bbox", "page": page, "bbox": bbox},
+        "citation": {"kind": "pdf_bbox", "source_path": f"tests/fixtures/isolation/{doc_id}.pdf", "page": page, "bbox": bbox},
         "lineage": {"parents": [], "source_sha256": sha},
         "ingest_flags": [],
     }
