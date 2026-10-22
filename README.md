@@ -115,3 +115,92 @@ Copy `.env.example` to `.env` and paste the key into `OPENAI_API_KEY=` locally.
 The shared helper reads it lazily for provider calls; an exported environment
 variable takes precedence. `.env` and other real environment files are ignored
 by Git. Adding a key does not change the default replay mode.
+
+## CS2 public-company acquisition
+
+Start with the [public ingestion guide](docs/public_ingestion.md) for the
+configurable ten-company test batch, earnings acquisition, record/replay and
+per-company status. Raw source acquisition is implemented; financial and text
+processing are subsequent P0 work, not claimed complete by downloaded files.
+
+
+## CS2 teammate document handoff
+
+**Publication status:** the 352 MB document/cache archive is uploaded to the
+team's DVC S3 remote. Use `python -m src.handoff` to download, restore and check
+it. For just the Git-shared JSONL examples without AWS, run
+`python -m src.handoff --samples-only`.
+
+Development runs on each teammate's laptop; S3 stores the shared DVC download.
+No EC2 instance is required. Instructor inputs are pending and do not block use
+of the public documents, cited Apple examples and clearly fictional practice memo.
+
+Get this branch before it is merged (start from a clean working tree):
+
+```bash
+git fetch origin
+git switch --track origin/lokesh/cs2-document-handoff
+```
+
+If you already have that local branch, use `git switch lokesh/cs2-document-handoff`
+and `git pull --ff-only`. After merge, use updated `main` instead. Install the
+shared Python 3.11 requirements using the environment instructions above.
+
+Configure your own AWS CLI profile once, if not already configured. Enter your
+own access-key ID/secret at the local prompts, region `us-east-1`, output `json`.
+The AWS console password is not an API access key. Skip configuration when your
+existing profile already works; select its name in `AWS_PROFILE` instead.
+
+```bash
+aws configure --profile lantern
+export AWS_PROFILE=lantern
+aws sts get-caller-identity
+aws s3 ls s3://lantern-team2-dvc-fall-2026/dvc/
+source .venv/bin/activate
+python -m src.handoff
+```
+
+`python -m src.handoff` runs `dvc pull data/handoff.dvc`, restores the compressed
+public-document snapshot and synthetic caches, validates both JSONL examples,
+and runs the fictional extraction/embedding replay with provider access blocked.
+No OpenAI key or model download is needed for replay. Existing identical files
+are reused; differing local files are reported rather than overwritten. Keep
+about 2 GB free for the restored sources, plus room for the compressed download
+and DVC cache. For a rerun without S3 access use `python -m src.handoff --local`.
+
+Expected final line: **Handoff ready: source documents restored, JSONL valid,
+model/embedding replay passed.** Send that result or the error message to the
+team; never send credentials. Access confirmation is an ongoing teammate check,
+not a condition for implementing their parts.
+
+Where to start:
+
+- `examples/cs2/records.jsonl`: cited document-block examples for Shravya.
+- `examples/cs2/facts.jsonl`: normalized numeric examples for Gunna and Dhruvi.
+- `examples/synthetic/kestrel_practice_memo.md`: invented development memo, not
+  instructor Kestrel or Deal A/B.
+- `data/edgar_comps/<run_id>/manifest.jsonl`: the ten companies' source filings.
+- `data/earnings/<run_id>/manifest.jsonl`: selected 8-Ks and earnings exhibits.
+
+`run_id` comes from `ingest.public.run_id` in `params.yaml`. Manifests contain
+source paths and hashes. The downloads are raw source documents, not finished
+CS2 extraction or a completed DuckDB fact store. Read [CONTRACTS.md](docs/CONTRACTS.md)
+for the already defined record/fact fields and each owner's remaining interfaces.
+
+DVC basics: Git carries code and `.dvc` pointers; DVC/S3 carries the dataset.
+To download this handoff only: `dvc pull data/handoff.dvc`. A bare `dvc pull`
+also requests inherited CS1 artifacts and is unnecessary for this handoff.
+If a dataset pointer changes after a Git pull, pull the corresponding DVC target
+again. `AccessDenied` means check the selected profile and bucket policy;
+`Unable to locate credentials` means the shell has no usable AWS profile;
+missing cache objects should be reported with the pointer/branch being used.
+
+Maintainers updating the selected snapshot run `python -m src.handoff --pack`,
+`dvc add data/handoff`, then `dvc push data/handoff.dvc`, and commit the updated
+pointer with the matching code/configuration. The raw acquisition stage outputs
+use `persist: true` and `cache: false`; the compressed handoff is the shared
+DVC artifact, avoiding a second upload of the expanded sources. Do not run
+`dvc gc` against the shared remote or change other teammates' data.
+
+References: [AWS CLI profiles](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html),
+[DVC pull](https://doc.dvc.org/command-reference/pull).
