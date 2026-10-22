@@ -233,3 +233,41 @@
 - One real Luna synthetic structured request succeeded: 77 input tokens, 16 output tokens, estimated model cost $0.0000157. No credential was printed.
 - Cached replay matched with provider initialization and socket connections blocked; ledger bytes stayed unchanged. Temporary verification script and evidence stayed outside the repository.
 - Real Kestrel/variant recordings, DVC cache tracking, provider billing alerts and full pipeline replay remain pending. No commit or push performed.
+
+### 2026-10-16 — Initial shared data sample
+
+- Tool/model: Codex (GPT-6), PDF skill. Checked CS2 Appendix C and Part 1 against inherited contracts. Added two manually prepared public filing records and two normalized facts from the existing statement fixture, with source hashes, page-relative boxes and parent lineage; documented loading and intended teammate use.
+- Verification: compared amounts to source PDF text, checked bounding boxes from Poppler output, source hashes, fact-to-record references and inherited record-field validation using a temporary check. No provider, EDGAR, AWS or DVC remote calls.
+- Limitation found: inherited validator accepts lantern/1.0 only; production CS2 schema validation, private-source interfaces and full ingestion are not implemented by this sample. No claim of Kestrel or unseen-company readiness.
+- Confidence: high for this small source-backed format example; broader source types require implementation and validation. No commit or push performed.
+
+### 2026-10-16 — Implement assignment-defined CS2 validation
+
+- Tool/model: Codex (GPT-6). Added additive BlockV2 and FinancialFact models, five discriminated citation locators, explicit CS1 upgrade, write-time validation and an offline JSONL validation command. Preserved CS1 schema/export behavior. Documented private inputs with unavailable SEC/PDF metadata rather than fabricated values.
+- Requirement: CS2 P0 requires validated lantern/2.0 records; P1 requires cited tier-1–3 facts and excludes management/web claims. Persistent tests exercise these acceptance requirements and invalid period/source/locator metadata.
+- Verification: sample commands each report 2 valid / 0 errors; focused CS2/CS1 export suite 53 passed, 2 skipped. Full suite: 205 passed, 13 skipped; git diff --check passed.
+- Limitation: structural validation does not resolve citations or infer source truth. Retrieval authorization, DuckDB persistence, ingestion write integration and claims/calculation service models remain their parts' work.
+- Confidence: high for the documented schema boundary and CS1 compatibility covered by tests. Changes remain local and uncommitted.
+
+### 2026-10-16 — Configurable public-company acquisition smoke
+
+- Tool/model: Codex (GPT-6). Added configurable SEC ticker/CIK acquisition for comps filings and earnings 8-Ks with EX-99.1 exhibits, bounded SEC request rate, atomic HTTP record/replay cache, resumable per-company statuses, source hashes, run snapshots and timing/RSS measurements. DVC stages use replay by default; params start with AAPL/NVDA/COST and permit command-line batches.
+- Verification: first ran AAPL/NVDA/COST alone: 6 10-K/10-Qs and 12 8-Ks, all three companies complete. Then ran the final ten-company config: 20 10-K/10-Qs and 40 latest distinct earnings-quarter 8-Ks with EX-99.1 exhibits, all ten complete. Ten-company statement acquisition: 44.92 s elapsed, 5.17 s CPU, 71 SEC requests, process peak RSS 540,327,936 bytes. Earnings: 38.76 s elapsed, 4.35 s CPU, 141 requests, peak RSS 415,399,936 bytes. These wall times include network response time. Per-company statuses/manifests are under ignored data outputs. Microsoft/JPMorgan acquisition failures due to filing-agent accession prefixes were resumed from cache after correcting Archive URLs to use each filing registrant CIK. XOM history was combined using `historical_ciks` and deduplicated by report-date quarter.
+- Limitation: these are raw sources, not Arelle/Docling extraction or lantern/2.0 output. DVC tracking/push, private/web P0 work, scale-up comparison and Linux replay remain pending.
+- Confidence: high that configured multi-company SEC discovery/acquisition and resume work; full P0 remains incomplete. All code/docs and downloaded outputs remain local; no commit/push or DVC push.
+
+
+## 2026-10-19 — Publish CS2 document/contracts handoff
+- Tool/model: Codex (GPT-6). Rebased the preserved P0 working changes onto merged main; combined the shared-client and record/fact contracts; documented remaining per-owner interfaces and the P1 claim/reconciliation baseline from the brief. Added local/S3 handoff commands and consolidated synthetic files into the normal checkout.
+- Verification: 62 focused tests passed; full suite 242 passed, 13 skipped. Both public acquisition DVC stages replayed successfully for ten companies (20 primary filings, 40 earnings filings). Local handoff restored/verified 2,824 files, validated two records and two facts, and replayed the synthetic profile/open embedding with the provider accessor blocked. The live synthetic request used 325 input/64 output tokens, estimated USD 0.0000645 at configured rates.
+- Failure/limitation: the first synthetic runner did not match the earlier cache identity; recorded the exact new request before proving replay. Packaging reduced the expanded selected snapshots to 352,358,047 compressed bytes. S3 publication initially failed with 403; the local default AWS profile returned InvalidClientTokenId. The local AWS CLI executable also reported bad CPU type. Teammate account access is user-confirmed and is not being treated as a coding blocker. Full inherited CS1/Linux reproduction remains separate later validation.
+- Confidence: high for the tested local handoff and contract validation; remote availability requires a successful DVC upload using the correct AWS profile. Public downloads are raw sources, not completed P0 extraction/P1 facts. Instructor inputs are still pending.
+
+
+### Handoff S3 publication follow-up
+- The user configured profile `lantern`; STS verified `user/lokesh-lantern`.
+- `AWS_PROFILE=lantern dvc push data/handoff.dvc` uploaded both objects. Cloud
+  status was checked and S3 reported the expected 352,358,047-byte archive.
+- Removed the README's upload-pending notice. This resolves the earlier local
+  credential/upload failure; no new EC2 resources or IAM changes were made.
+- Verification confirms remote availability, not a fresh Linux reproduction.

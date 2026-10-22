@@ -158,3 +158,32 @@ stages:
       - docling
     outs:
       - data/bench
+
+
+  ingest_comps:
+    cmd: python -m src.ingest.public --params params.yaml --stage comps --output data/edgar_comps
+    deps:
+      - src/ingest
+      - src/download.py
+      - requirements.txt
+    params:
+      - comps
+      - ingest.public
+    outs:
+      - data/edgar_comps/${ingest.public.run_id}:
+          cache: false
+          persist: true
+
+  ingest_earnings:
+    cmd: python -m src.ingest.public --params params.yaml --stage earnings --output data/earnings
+    deps:
+      - src/ingest
+      - src/download.py
+      - requirements.txt
+    params:
+      - comps
+      - ingest.public
+    outs:
+      - data/earnings/${ingest.public.run_id}:
+          cache: false
+          persist: true

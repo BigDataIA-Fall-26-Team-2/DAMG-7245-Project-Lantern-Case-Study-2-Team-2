@@ -645,3 +645,109 @@ stages:
       md5: 463bfc054cde3750dd38e3233eb53dbb.dir
       size: 21655
       nfiles: 12
+  ingest_comps:
+    cmd: python -m src.ingest.public --params params.yaml --stage comps --output
+      data/edgar_comps
+    deps:
+    - path: requirements.txt
+      hash: md5
+      md5: 7190be2b0b1dd0e1792cc827119d3043
+      size: 6104
+    - path: src/download.py
+      hash: md5
+      md5: e74a74029cb362aca2e1344179786a89
+      size: 6381
+    - path: src/ingest
+      hash: md5
+      md5: af45bd22ddb617b76313cb19e5ea9441.dir
+      size: 51673
+      nfiles: 6
+    params:
+      params.yaml:
+        comps:
+          tickers:
+          - AAPL
+          - NVDA
+          - MSFT
+          - GOOGL
+          - AMZN
+          - COST
+          - WMT
+          - JPM
+          - V
+          - XOM
+          historical_ciks:
+            XOM:
+            - '0000034088'
+          forms:
+          - 10-K
+          - 10-Q
+          after: '2025-01-01'
+          before: '2026-10-16'
+          earnings_8k_quarters: 4
+        ingest.public:
+          mode: replay
+          run_id: public-ten-20261016-v3
+          user_agent: LANTERN Team 2 nandavarapu.s@northeastern.edu
+          requests_per_second: 4
+          timeout_s: 30
+          max_attempts: 2
+    outs:
+    - path: data/edgar_comps/public-ten-20261016-v3
+      hash: md5
+      md5: 28ad5322757745ab4cbd503f06459679.dir
+      size: 1369838047
+      nfiles: 2406
+  ingest_earnings:
+    cmd: python -m src.ingest.public --params params.yaml --stage earnings
+      --output data/earnings
+    deps:
+    - path: requirements.txt
+      hash: md5
+      md5: 7190be2b0b1dd0e1792cc827119d3043
+      size: 6104
+    - path: src/download.py
+      hash: md5
+      md5: e74a74029cb362aca2e1344179786a89
+      size: 6381
+    - path: src/ingest
+      hash: md5
+      md5: af45bd22ddb617b76313cb19e5ea9441.dir
+      size: 51673
+      nfiles: 6
+    params:
+      params.yaml:
+        comps:
+          tickers:
+          - AAPL
+          - NVDA
+          - MSFT
+          - GOOGL
+          - AMZN
+          - COST
+          - WMT
+          - JPM
+          - V
+          - XOM
+          historical_ciks:
+            XOM:
+            - '0000034088'
+          forms:
+          - 10-K
+          - 10-Q
+          after: '2025-01-01'
+          before: '2026-10-16'
+          earnings_8k_quarters: 4
+        ingest.public:
+          mode: replay
+          run_id: public-ten-20261016-v3
+          user_agent: LANTERN Team 2 nandavarapu.s@northeastern.edu
+          requests_per_second: 4
+          timeout_s: 30
+          max_attempts: 2
+    outs:
+    - path: data/earnings/public-ten-20261016-v3
+      hash: md5
+      md5: 66dd66432bc539da76e100128043c46d.dir
+      size: 415088497
+      nfiles: 406
