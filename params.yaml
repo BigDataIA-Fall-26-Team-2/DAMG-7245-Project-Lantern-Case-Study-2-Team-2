@@ -199,3 +199,15 @@ ingest:
     requests_per_second: 4
     timeout_s: 30
     max_attempts: 2
+
+# CS2 Part 2-3 retrieval (Appendix B). strategy/chunk sizes are provisional
+# until retrieval_eval picks the winner; hybrid stays off until dense search lands.
+retrieval:
+  strategy: block
+  chunk_tokens: 400
+  overlap_tokens: 0
+  k: 10
+  hybrid:
+    enabled: false
+    rrf_k: 60
+  reranker: none
