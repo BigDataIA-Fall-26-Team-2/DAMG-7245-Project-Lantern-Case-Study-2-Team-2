@@ -62,3 +62,12 @@
 - Changes: the first version absorbed blocks by position only and made 10-Q p11 and p16 worse; the page-by-page check showed the absorbed labels were in layout's routed table but not in Part 2's CSVs, which the export uses, so blocks are now absorbed only if their words are in both. Measurement runs rewrote Guna's report files; I reverted them so he regenerates them after merge.
 - Limitation: statement titles and units lines the detector never boxes are still missing from the traditional path; the 80% overlap threshold is a judgement call, not tuned.
 - Confidence: high that no page got worse on the 16 ground-truth pages. I can explain, modify, rerun and defend this work.
+
+## 2026-10-22 — P2: scoped retrieval skeleton and search contract
+
+- **Tool/model:** Claude Opus 5.5 (claude.ai).
+- **Contribution:** Drafted `src/retrieve.py` (scope rules, `SearchResult` model, BM25 ranking with the scope filter applied before ranking), `tests/test_retrieval.py`, the `retrieval:` block in `params.yaml`, the retrieval interface section in `docs/CONTRACTS.md`, and `examples/cs2/search_results.jsonl`.
+- **Verification:** On the isolation fixture records, a `deal_a` query returned 3 Deal A blocks and 1 public block with no Deal B block, and the Deal A customer block ranked first (0.957 vs 0.156). The same query with no scope raised `ScopeError`. 18 new tests pass; full `pytest -q` passed 255, skipped 18. The example search ranked "Total net sales" first for a revenue question.
+- **Failure/fix:** Running a single test file with plain `pytest` could not import `src`; `python -m pytest` and the full-suite run both work, matching the existing tests' import style.
+- **Limits:** Each block is treated as one chunk until the chunker exists. BM25 only; dense and hybrid search are not implemented. BM25 scores can be slightly negative on very small corpora (seen on the two-record example), so scores are only comparable within one result list. The full fixture-based isolation test, including the failing run with the filter removed, is not written yet.
+- **Confidence/responsibility:** High for scope enforcement and the result contract, which are covered by tests and manual checks. Ranking quality is not yet measured, since qrels and metrics come later. I have reviewed the code, tests and contract and can explain, modify, test, and defend them.

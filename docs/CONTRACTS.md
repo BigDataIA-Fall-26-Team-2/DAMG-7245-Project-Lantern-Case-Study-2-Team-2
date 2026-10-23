@@ -221,3 +221,60 @@ store/reconciler remains P1 work. Consumers can use the documented fields now.
 The existing `BlockV2` and `FinancialFact` models are executable validators.
 The claim/reconciliation definitions above are the implementation baseline;
 claim/reconciliation model classes are not delivered by this setup branch.
+
+## Shravya P2/P3 retrieval interface
+
+`src/retrieve.py` is the only entry point for document search. Consumers call
+`Retriever(records, params=None).search(query, scope, k=None)` and receive a
+ranked list of `SearchResult` objects. The interface stays the same when
+chunking strategies and dense/hybrid search are added; only `method`, `chunk_id`
+and `block_ids` contents change.
+
+### Scope (required on every call)
+
+| Query scope | May return records with `deal_id` |
+|---|---|
+| `deal_a` | `deal_a`, `public` |
+| `deal_b` | `deal_b`, `public` |
+| `kestrel` | `kestrel`, `public` |
+| `public` | `public` |
+
+- A missing or empty scope raises `ScopeError` ("every query must name a scope").
+- Any other value, including different capitalisation, raises `ScopeError` ("unknown scope").
+- The filter runs on the candidate set before ranking, so out-of-scope records are
+  never scored, and ranking statistics come only from in-scope records.
+- An empty or whitespace-only query raises `ValueError`.
+
+### `SearchResult` fields
+
+| Field | Type | Meaning |
+|---|---|---|
+| `chunk_id` | str | Chunk identity. Currently the record ID `doc_id:block_id`; multi-block chunk IDs are defined with the chunker. |
+| `doc_id` | str | Source document (accession number or `DR-<deal>-<NNN>`). |
+| `block_ids` | list[str], non-empty | The CS1 blocks this chunk covers, for citation. |
+| `deal_id` | `public` / `deal_a` / `deal_b` / `kestrel` | Always within the query's allowed set. |
+| `source_type` | str | Copied from the record. |
+| `tier` | int 1-6 | Factual tier, copied from the record. |
+| `section` | str or null | Copied from the record. |
+| `page` | int or null | 1-based page, copied from the record. |
+| `text` | str | Searchable text; tables use header and row text. |
+| `score` | float | Method-specific score; compare only within one result list. |
+| `rank` | int, 1-based | Position in the list, consecutive from 1. |
+| `method` | `bm25` / `dense` / `hybrid` | Which retriever produced the list. Currently always `bm25`. |
+
+Results are validated by the `SearchResult` Pydantic model on creation (`extra="forbid"`).
+Ties are broken by `chunk_id`, so the same records, query and parameters always give
+the same order.
+
+### Parameters
+
+`params.yaml` `retrieval.*` (Appendix B): `strategy`, `chunk_tokens`, `overlap_tokens`,
+`k` (default result count), `hybrid.enabled`, `hybrid.rrf_k`, `reranker`. Strategy and
+sizes are provisional until `retrieval_eval` selects them; hybrid is off until dense
+search lands.
+
+### Not yet implemented
+
+Chunking strategies (`src/chunk.py`), embeddings and the Chroma index (`src/index.py`),
+dense and hybrid retrieval, and the full fixture-based isolation test in
+`tests/test_retrieval.py`.

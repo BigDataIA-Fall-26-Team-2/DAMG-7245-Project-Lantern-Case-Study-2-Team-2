@@ -80,3 +80,11 @@ was extracted correctly or a citation actually resolves. Source-file checks and
 facts-to-source verification belong in ingestion/P1 integration. It does not
 implement retrieval filtering, a DuckDB store, reconciliation or Q&A. Instructor
 and private inputs stay in DVC; do not copy them into examples.
+
+## Search result example (Shravya P2)
+
+`search_results.jsonl` is the output of
+`Retriever(records).search("total net sales revenue", "public")` over
+`records.jsonl`, one `SearchResult` per line (see the retrieval interface in
+`docs/CONTRACTS.md`). Scores are BM25 and can be slightly negative on a
+two-record corpus; compare scores only within one result list.
